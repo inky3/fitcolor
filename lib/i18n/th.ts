@@ -2,7 +2,7 @@ import type { Dictionary } from "./en";
 
 const th: Dictionary = {
   brand: "Fitcolor",
-  tagline: "color wheel ของการแต่งตัว",
+  tagline: "coolors.co ของการแต่งตัว",
   nav: { generator: "สุ่มชุด", favorites: "รายการโปรด", howItWorks: "หลักการทำงาน" },
 
   slots: {

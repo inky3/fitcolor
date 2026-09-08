@@ -1,6 +1,6 @@
 const en = {
   brand: "Fitcolor",
-  tagline: "The color wheel of getting dressed",
+  tagline: "The coolors.co of getting dressed",
   nav: { generator: "Generator", favorites: "Favorites", howItWorks: "How it works" },
 
   slots: {

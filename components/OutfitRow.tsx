@@ -2,170 +2,54 @@
 
 import React from "react";
 import OutfitSlot from "./OutfitSlot";
-
-import {
-  SlotKey,
-  SLOT_ORDER,
-} from "@/lib/harmonyEngine";
-
-import {
-  PaletteColor,
-  Undertone,
-} from "@/lib/palette";
-
-import {
-  OutfitState,
-  Fit,
-} from "@/lib/outfitState";
-
+import { SlotKey, SLOT_ORDER } from "@/lib/harmonyEngine";
+import { PaletteColor, Undertone } from "@/lib/palette";
+import { OutfitState, Fit } from "@/lib/outfitState";
 import { useI18n } from "@/lib/i18n";
 
 interface Props {
-  colors: Record<
-    SlotKey,
-    PaletteColor
-  >;
-
+  colors: Record<SlotKey, PaletteColor>;
   state: OutfitState;
-
-  onToggleLock: (
-    slot: SlotKey
-  ) => void;
-
-  onSetFit: (
-    slot: SlotKey,
-    fit: Fit
-  ) => void;
+  rerollTrigger: number;
+  onToggleLock: (slot: SlotKey) => void;
+  onSetFit: (slot: SlotKey, fit: Fit) => void;
 }
 
-/*
- * Slots that support the
- * Fitted / Loose selector.
- */
-const FIT_SLOTS: SlotKey[] = [
-  "top",
-  "bottom",
-  "outerwear",
-];
+const FIT_SLOTS: SlotKey[] = ["top", "bottom", "outerwear"];
 
-export default function OutfitRow({
-  colors,
-  state,
-  onToggleLock,
-  onSetFit,
-}: Props) {
+export default function OutfitRow({ colors, state, rerollTrigger, onToggleLock, onSetFit }: Props) {
   const { t } = useI18n();
 
   return (
-    <div
-      className="
-        w-full
-        flex
-        flex-wrap
-        justify-center
-        items-start
-        gap-3
-        sm:gap-4
-      "
-    >
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 w-full">
       {SLOT_ORDER.map((slot) => {
-        const color = colors[slot];
-
-        const supportsFit =
-          FIT_SLOTS.includes(slot);
-
-        const flatterBadge =
-          getFlatterBadge(
-            color,
-            state.undertone,
-            t
-          );
-
+        const flatterBadge = getFlatterBadge(colors[slot], state.undertone, t);
         return (
-          <div
+          <OutfitSlot
             key={slot}
-            className="
-              w-[calc(50%-6px)]
-              sm:w-[calc(33.333%-11px)]
-              lg:flex-1
-              lg:w-auto
-              lg:min-w-0
-            "
-          >
-            <OutfitSlot
-              slot={slot}
-              color={color}
-              locked={
-                state.locks[slot]
-              }
-              onToggleLock={() =>
-                onToggleLock(slot)
-              }
-              fit={
-                supportsFit
-                  ? state.fits[slot] ??
-                    "fitted"
-                  : undefined
-              }
-              onSetFit={
-                supportsFit
-                  ? (fit) =>
-                      onSetFit(
-                        slot,
-                        fit
-                      )
-                  : undefined
-              }
-              flatterBadge={
-                flatterBadge
-              }
-            />
-          </div>
+            slot={slot}
+            color={colors[slot]}
+            locked={state.locks[slot]}
+            onToggleLock={() => onToggleLock(slot)}
+            rerollTrigger={rerollTrigger}
+            fit={FIT_SLOTS.includes(slot) ? state.fits[slot] ?? "fitted" : undefined}
+            onSetFit={FIT_SLOTS.includes(slot) ? (fit) => onSetFit(slot, fit) : undefined}
+            flatterBadge={flatterBadge}
+          />
         );
       })}
     </div>
   );
 }
 
-/*
- * ==========================================================
- * UNDERTONE / FLATTER BADGE
- * ==========================================================
- */
-
 function getFlatterBadge(
   color: PaletteColor,
   undertone: Undertone | null,
-  t: (
-    path: string,
-    vars?: Record<string, string>
-  ) => string
+  t: (path: string, vars?: Record<string, string>) => string
 ): string | null {
-  /*
-   * If the user hasn't selected
-   * an undertone, don't show anything.
-   */
-  if (!undertone) {
-    return null;
+  if (!undertone) return null;
+  if (color.undertone === undertone) {
+    return t("flatterBadge.flatters");
   }
-
-  /*
-   * Show the badge when the color
-   * matches the selected undertone.
-   */
-  if (
-    color.undertone ===
-    undertone
-  ) {
-    return t(
-      "flatterBadge.strongMatch",
-      {
-        undertone: t(
-          `settings.${undertone}`
-        ).toLowerCase(),
-      }
-    );
-  }
-
   return null;
 }

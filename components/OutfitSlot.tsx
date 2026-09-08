@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SlotKey } from "@/lib/harmonyEngine";
-import { PaletteColor } from "@/lib/palette";
+import { PaletteColor, PALETTE } from "@/lib/palette";
 import { getContrastText } from "@/lib/colorUtils";
 import { SLOT_ICONS } from "@/components/icons/GarmentIcons";
 import { useI18n } from "@/lib/i18n";
@@ -13,359 +13,154 @@ interface Props {
   color: PaletteColor;
   locked: boolean;
   onToggleLock: () => void;
+  rerollTrigger: number;
   fit?: Fit;
   onSetFit?: (fit: Fit) => void;
   flatterBadge?: string | null;
 }
+
+const FLICKER_STEPS = 6;
+const FLICKER_INTERVAL = 45;
 
 export default function OutfitSlot({
   slot,
   color,
   locked,
   onToggleLock,
+  rerollTrigger,
   fit,
   onSetFit,
   flatterBadge,
 }: Props) {
   const { t, lang } = useI18n();
-
   const Icon = SLOT_ICONS[slot];
+  const [displayHex, setDisplayHex] = useState(color.hex);
+  const [flickering, setFlickering] = useState(false);
+  const isFirstRun = useRef(true);
 
-  /*
-   * Use the actual color from the outfit state.
-   *
-   * There is intentionally:
-   * - no random color
-   * - no flicker
-   * - no animation
-   */
-  const textColor = getContrastText(color.hex);
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      setDisplayHex(color.hex);
+      return;
+    }
+    if (locked) {
+      setDisplayHex(color.hex);
+      return;
+    }
 
-  const hasFit = Boolean(onSetFit && fit);
+    setFlickering(true);
+    let step = 0;
+    const interval = setInterval(() => {
+      step += 1;
+      const randomColor = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+      setDisplayHex(randomColor.hex);
+      if (step >= FLICKER_STEPS) {
+        clearInterval(interval);
+        setDisplayHex(color.hex);
+        setFlickering(false);
+      }
+    }, FLICKER_INTERVAL);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rerollTrigger]);
+
+  useEffect(() => {
+    if (locked) setDisplayHex(color.hex);
+  }, [color.hex, locked]);
+
+  const textColor = getContrastText(displayHex);
 
   return (
-    <article
-      className="
-        w-full
-        min-w-0
-        overflow-hidden
-        rounded-2xl
-        border
-        border-ink/10
-        dark:border-cream/10
-        bg-paper-card
-        dark:bg-charcoal-card
-        shadow-sm
-      "
-    >
-      {/* ==================================================
-          COLOR PANEL
-      ================================================== */}
-
+    <div className="flex flex-col rounded-2xl overflow-hidden border border-ink/10 dark:border-cream/10 bg-paper-card dark:bg-charcoal-card shadow-sm w-full">
       <div
-        className="
-          relative
-          w-full
-          aspect-[4/5]
-          p-4
-          sm:p-5
-          flex
-          flex-col
-        "
-        style={{
-          backgroundColor: color.hex,
-          color: textColor,
-        }}
+        className="relative flex flex-col p-4 sm:p-5 min-h-[230px] sm:min-h-[270px] transition-colors duration-100"
+        style={{ backgroundColor: displayHex }}
       >
-        {/* ==================================================
-            TOP ROW
-        ================================================== */}
-
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between">
           <span
-            className="
-              min-w-0
-              flex-1
-              font-body
-              text-xs
-              sm:text-sm
-              uppercase
-              tracking-wide
-              truncate
-            "
-            style={{
-              opacity: 0.8,
-            }}
+            className="text-xs font-body tracking-wide uppercase opacity-80"
+            style={{ color: textColor }}
           >
             {t(`slots.${slot}`)}
           </span>
-
-          {/* Lock button */}
-
           <button
             type="button"
             onClick={onToggleLock}
             aria-pressed={locked}
-            aria-label={
-              locked
-                ? t("unlock")
-                : t("lock")
-            }
-            className="
-              shrink-0
-              w-10
-              h-10
-              sm:w-11
-              sm:h-11
-              rounded-full
-              border
-              flex
-              items-center
-              justify-center
-              hover:opacity-100
-            "
+            aria-label={locked ? t("unlock") : t("lock")}
+            className="rounded-full p-1.5 border transition-opacity hover:opacity-100"
             style={{
               borderColor: textColor,
               color: textColor,
               opacity: locked ? 1 : 0.65,
-              backgroundColor: locked
-                ? textColor === "#22201B"
-                  ? "rgba(34,32,27,0.12)"
-                  : "rgba(245,241,232,0.18)"
-                : "transparent",
+              backgroundColor: locked ? (textColor === "#22201B" ? "rgba(34,32,27,0.12)" : "rgba(245,241,232,0.18)") : "transparent",
             }}
           >
-            {locked ? (
-              <LockClosedIcon />
-            ) : (
-              <LockOpenIcon />
-            )}
+            {locked ? <LockClosedIcon /> : <LockOpenIcon />}
           </button>
         </div>
 
-        {/* ==================================================
-            GARMENT ICON
-        ================================================== */}
+        <Icon className="w-14 h-14 self-center opacity-90 my-auto" style={{ color: textColor } as React.CSSProperties} />
 
-        <div className="flex-1 flex items-center justify-center">
-          <Icon
-            className="
-              w-12
-              h-12
-              sm:w-14
-              sm:h-14
-            "
-            style={{
-              color: textColor,
-              opacity: 0.9,
-            }}
-          />
-        </div>
-
-        {/* ==================================================
-            COLOR INFORMATION
-        ================================================== */}
-
-        <div className="min-w-0">
-          {/* -----------------------------------------------
-              COLOR NAME
-
-              Explicitly 14px.
-              No text-lg / text-xl / text-2xl.
-          ----------------------------------------------- */}
-
-          <div
-            className="
-              h-[56px]
-              flex
-              items-start
-            "
-          >
-            <p
-              className="
-                font-display
-                text-[14px]
-                leading-[1.25]
-                line-clamp-2
-                overflow-hidden
-              "
+        <div className="mt-auto space-y-1.5" style={{ color: textColor }}>
+          {flatterBadge && !flickering && (
+            <span
+              className="inline-block max-w-full text-[10px] font-body px-2 py-1 rounded-full backdrop-blur-sm"
+              style={{
+                color: textColor,
+                backgroundColor: textColor === "#22201B" ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.28)",
+              }}
             >
-              {color.name[lang] ??
-                color.name.en}
+              {flatterBadge}
+            </span>
+          )}
+          <div className="space-y-0.5">
+            <p className="font-display text-base sm:text-lg leading-tight">
+              {color.name[lang] ?? color.name.en}
             </p>
+            <p className="font-body text-xs opacity-75 uppercase tracking-wide">{color.hex}</p>
           </div>
-
-          {/* -----------------------------------------------
-              HEX COLOR
-          ----------------------------------------------- */}
-
-          <p
-            className="
-              font-body
-              text-xs
-              tracking-wide
-              opacity-75
-            "
-          >
-            {color.hex}
-          </p>
         </div>
-
-        {/* ==================================================
-            UNDERTONE BADGE
-        ================================================== */}
-
-        {flatterBadge && (
-          <span
-            className="
-              absolute
-              bottom-3
-              right-3
-              max-w-[80%]
-              px-2
-              py-1
-              rounded-full
-              text-[9px]
-              font-body
-              truncate
-              backdrop-blur-sm
-            "
-            style={{
-              color: textColor,
-              backgroundColor:
-                textColor === "#22201B"
-                  ? "rgba(255,255,255,0.35)"
-                  : "rgba(0,0,0,0.25)",
-            }}
-          >
-            {flatterBadge}
-          </span>
-        )}
       </div>
 
-      {/* ==================================================
-          FIT CONTROL
-
-          Always the same height.
-          Shoes/accessory have an empty area.
-      ================================================== */}
-
-      <div
-        className="
-          h-16
-          w-full
-          shrink-0
-          flex
-          items-center
-          justify-center
-          px-2
-          bg-paper
-          dark:bg-charcoal
-        "
-      >
-        {hasFit && (
-          <div
-            className="
-              w-full
-              grid
-              grid-cols-2
-              gap-1
-            "
-          >
-            {(
-              ["fitted", "loose"] as Fit[]
-            ).map((option) => {
-              const active =
-                fit === option;
-
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() =>
-                    onSetFit?.(option)
-                  }
-                  className={`
-                    w-full
-                    min-w-0
-                    rounded-full
-                    px-2
-                    py-2
-                    font-body
-                    text-xs
-                    whitespace-nowrap
-                    ${
-                      active
-                        ? "bg-moss text-cream dark:bg-sage dark:text-charcoal"
-                        : "text-ink-soft dark:text-cream/70 hover:bg-ink/5 dark:hover:bg-cream/10"
-                    }
-                  `}
-                >
-                  {t(
-                    `fit.${option}`
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </article>
+      {onSetFit && fit && (
+        <div className="flex items-center justify-center gap-1 p-2 bg-paper dark:bg-charcoal">
+          {(["fitted", "loose"] as Fit[]).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => onSetFit(f)}
+              className={`text-xs font-body px-3 py-1 rounded-full transition-colors ${
+                fit === f
+                  ? "bg-moss text-cream dark:bg-sage dark:text-charcoal"
+                  : "text-ink-soft dark:text-cream/70 hover:bg-ink/5 dark:hover:bg-cream/10"
+              }`}
+            >
+              {t(`fit.${f}`)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-/* ==========================================================
-   LOCK ICONS
-========================================================== */
-
 function LockClosedIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect
-        x="5"
-        y="10"
-        width="14"
-        height="10"
-        rx="2"
-      />
-
-      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 018 0v4" />
     </svg>
   );
 }
 
 function LockOpenIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect
-        x="5"
-        y="10"
-        width="14"
-        height="10"
-        rx="2"
-      />
-
-      <path d="M8 10V7a4 4 0 0 1 8-4 4 4 0 0 1 4 4v1" />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 017.5-2" />
     </svg>
   );
 }
