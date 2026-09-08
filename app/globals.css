@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display-active: var(--font-fraunces);
+  --font-body-active: var(--font-plusjakarta);
+}
+
+html[lang="th"] {
+  --font-display-active: var(--font-noto-serif-th), var(--font-fraunces);
+  --font-body-active: var(--font-noto-sans-th), var(--font-plusjakarta);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f2eee6;
+  color: #22201b;
+}
+
+html.dark body {
+  background-color: #1c1a17;
+  color: #efeae0;
+}
+
+::selection {
+  background-color: #2b4c43;
+  color: #f5f1e8;
+}
+
+/* Keep focus visible everywhere for keyboard users without adding ring noise on mouse clicks. */
+:focus-visible {
+  outline: 2px solid #2b4c43;
+  outline-offset: 2px;
+}
+
+html.dark :focus-visible {
+  outline-color: #6fa893;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
