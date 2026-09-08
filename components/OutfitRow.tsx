@@ -39,8 +39,8 @@ interface Props {
 }
 
 /*
- * These are the garment slots that support
- * the Fitted / Loose selector.
+ * Slots that support the
+ * Fitted / Loose selector.
  */
 const FIT_SLOTS: SlotKey[] = [
   "top",
@@ -69,22 +69,17 @@ export default function OutfitRow({
       "
     >
       {SLOT_ORDER.map((slot) => {
-        /*
-         * Undertone guidance badge.
-         */
+        const color = colors[slot];
+
+        const supportsFit =
+          FIT_SLOTS.includes(slot);
+
         const flatterBadge =
           getFlatterBadge(
-            colors[slot],
+            color,
             state.undertone,
             t
           );
-
-        /*
-         * Only Top, Bottom and Outerwear
-         * have Fitted / Loose controls.
-         */
-        const supportsFit =
-          FIT_SLOTS.includes(slot);
 
         return (
           <div
@@ -99,7 +94,7 @@ export default function OutfitRow({
           >
             <OutfitSlot
               slot={slot}
-              color={colors[slot]}
+              color={color}
               locked={
                 state.locks[slot]
               }
@@ -134,7 +129,7 @@ export default function OutfitRow({
 
 /*
  * ==========================================================
- * UNDERTONE BADGE
+ * UNDERTONE / FLATTER BADGE
  * ==========================================================
  */
 
@@ -147,16 +142,16 @@ function getFlatterBadge(
   ) => string
 ): string | null {
   /*
-   * No undertone selected:
-   * don't show a badge.
+   * If the user hasn't selected
+   * an undertone, don't show anything.
    */
   if (!undertone) {
     return null;
   }
 
   /*
-   * Exact undertone match:
-   * show the flattering badge.
+   * Show the badge when the color
+   * matches the selected undertone.
    */
   if (
     color.undertone ===
