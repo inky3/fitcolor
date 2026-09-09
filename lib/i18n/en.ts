@@ -11,7 +11,12 @@ const en = {
     accessory: "Accessory",
   },
 
-  fit: { loose: "Loose", fitted: "Fitted" },
+  fit: {
+    loose: "Loose",
+    fitted: "Fitted",
+    looseHint: "Loose: relaxed cut with extra room — a more casual, easy line.",
+    fittedHint: "Fitted: tailored closer to the body — a cleaner, sharper line.",
+  },
 
   randomize: "Randomize outfit",
   spaceHint: "Press space to randomize",
@@ -118,6 +123,23 @@ const en = {
     undertoneBody:
       "Warm, cool, and neutral undertones are guidance only. A badge may note a strong match, but no palette is ever off-limits.",
     harmonyTitle: "Harmony rules",
+    fitTitle: "Fitted vs. loose",
+    fitBody:
+      "This toggles the silhouette, not the color. Fitted pieces sit closer to the body for a cleaner line; loose pieces sit further off the body for a relaxed, roomier line. Mixing one fitted piece with one loose piece (e.g. a fitted top with loose trousers) is a classic way to keep proportions balanced.",
+    wardrobeTitle: "Using your own wardrobe",
+    wardrobeBody:
+      "Add the actual colors of clothes you own in Settings, and turn on \"Use my wardrobe colors.\" The harmony engine will then build outfits only from those colors, still following whichever rule you've picked — so you get real combinations from your own closet, not just inspiration.",
+  },
+
+  wardrobe: {
+    title: "My wardrobe",
+    useToggle: "Use my wardrobe colors",
+    hint: "Add the actual colors of clothes you own. When the toggle is on, outfits are built only from these — still following your chosen harmony rule.",
+    colorLabel: "Color",
+    garmentPlaceholder: "Garment type (optional), e.g. Jacket",
+    add: "Add",
+    remove: "Remove",
+    empty: "No colors added yet.",
   },
 
   formality: { casual: "Casual", smart: "Smart casual", polished: "Polished", formal: "Formal" },

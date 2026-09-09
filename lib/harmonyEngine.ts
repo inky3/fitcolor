@@ -29,6 +29,8 @@ export interface GenerateOptions {
   formalityRange?: [number, number]; // 0-3 inclusive band
   lockedColors?: Partial<Record<SlotKey, PaletteColor>>;
   seedHue?: number; // optional fixed seed hue, otherwise random
+  wardrobe?: Partial<Record<SlotKey, PaletteColor[]>>; // user's own garment colors, per slot
+  useWardrobe?: boolean; // when true, slots with wardrobe colors draw only from those
 }
 
 function rand<T>(arr: T[]): T {
@@ -72,6 +74,22 @@ function pickNear(hue: number, opts: GenerateOptions, requireNeutral?: boolean):
     if (pool.length) return rand(pool);
   }
   return rand(PALETTE);
+}
+
+// Nearest hue match within a fixed pool (the user's own wardrobe colors for
+// this slot). We don't filter by formality/undertone/season here — these are
+// real garments the person told us they own, not candidates to screen out.
+function pickFromPool(hue: number, pool: PaletteColor[]): PaletteColor {
+  let best = pool[0];
+  let bestDist = Infinity;
+  for (const c of pool) {
+    const d = hueDistance(c.hue, hue);
+    if (d < bestDist) {
+      bestDist = d;
+      best = c;
+    }
+  }
+  return best;
 }
 
 function pickNeutral(opts: GenerateOptions): PaletteColor {
@@ -127,6 +145,12 @@ export function generateOutfit(opts: GenerateOptions): Record<SlotKey, PaletteCo
   SLOT_ORDER.forEach((slot, i) => {
     if (opts.lockedColors?.[slot]) {
       result[slot] = opts.lockedColors[slot]!;
+      return;
+    }
+
+    const wardrobePool = opts.useWardrobe ? opts.wardrobe?.[slot] : undefined;
+    if (wardrobePool && wardrobePool.length) {
+      result[slot] = pickFromPool(hues[i], wardrobePool);
       return;
     }
 

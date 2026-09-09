@@ -38,6 +38,11 @@ export default function GeneratorApp() {
     setUndertone,
     setSeason,
     shareUrl,
+    wardrobe,
+    useWardrobeColors,
+    setUseWardrobeColors,
+    addWardrobeItem,
+    removeWardrobeItem,
   } = useOutfit();
 
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
@@ -56,6 +61,11 @@ export default function GeneratorApp() {
     } else {
       setFavorites(addFavorite(state));
     }
+  };
+
+  const handleToggleUseWardrobe = () => {
+    setUseWardrobeColors(!useWardrobeColors);
+    reroll();
   };
 
   const handleSoundToggle = () => {
@@ -108,6 +118,11 @@ export default function GeneratorApp() {
           onOccasion={setOccasion}
           soundOn={soundOn}
           onSoundToggle={handleSoundToggle}
+          wardrobe={wardrobe}
+          useWardrobeColors={useWardrobeColors}
+          onAddWardrobeItem={addWardrobeItem}
+          onRemoveWardrobeItem={removeWardrobeItem}
+          onToggleUseWardrobe={handleToggleUseWardrobe}
         />
       </SettingsDrawer>
     </div>

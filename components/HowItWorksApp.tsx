@@ -41,10 +41,24 @@ export default function HowItWorksApp() {
         </ul>
       </section>
 
-      <section>
+      <section className="mb-10">
         <h2 className="font-display text-lg text-ink dark:text-cream mb-3">{t("howItWorksPage.undertoneTitle")}</h2>
         <p className="font-body text-sm text-ink-soft dark:text-cream/70 leading-relaxed">
           {t("howItWorksPage.undertoneBody")}
+        </p>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="font-display text-lg text-ink dark:text-cream mb-3">{t("howItWorksPage.fitTitle")}</h2>
+        <p className="font-body text-sm text-ink-soft dark:text-cream/70 leading-relaxed">
+          {t("howItWorksPage.fitBody")}
+        </p>
+      </section>
+
+      <section>
+        <h2 className="font-display text-lg text-ink dark:text-cream mb-3">{t("howItWorksPage.wardrobeTitle")}</h2>
+        <p className="font-body text-sm text-ink-soft dark:text-cream/70 leading-relaxed">
+          {t("howItWorksPage.wardrobeBody")}
         </p>
       </section>
     </div>

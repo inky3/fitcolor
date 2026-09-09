@@ -16,7 +16,7 @@ function GeneratorSkeleton() {
     <div className="flex flex-col items-center gap-8 pt-4 animate-pulse">
       <div className="h-8 w-64 rounded-full bg-paper-dim dark:bg-charcoal-line" />
       <div className="h-9 w-full max-w-xl rounded-full bg-paper-dim dark:bg-charcoal-line" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 w-full">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="aspect-[4/5] rounded-2xl bg-paper-dim dark:bg-charcoal-line" />
         ))}

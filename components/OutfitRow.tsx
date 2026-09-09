@@ -21,7 +21,7 @@ export default function OutfitRow({ colors, state, rerollTrigger, onToggleLock, 
   const { t } = useI18n();
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 w-full">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3 sm:gap-4 w-full">
       {SLOT_ORDER.map((slot) => {
         const flatterBadge = getFlatterBadge(colors[slot], state.undertone, t);
         return (

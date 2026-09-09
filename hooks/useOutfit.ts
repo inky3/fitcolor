@@ -2,11 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { findColor, PaletteColor, Undertone, Season } from "@/lib/palette";
+import { findColor, registerCustomColors, PaletteColor, Undertone, Season } from "@/lib/palette";
 import { generateOutfit, HarmonyRule, SlotKey, SLOT_ORDER } from "@/lib/harmonyEngine";
 import { findStyle, blendFormalityRange, StyleId } from "@/lib/styles";
 import { findOccasion, OccasionId } from "@/lib/occasions";
 import { OutfitState, Fit, encodeOutfitToParams, decodeOutfitFromParams } from "@/lib/outfitState";
+import {
+  WardrobeItem,
+  loadWardrobe,
+  addWardrobeItem as addWardrobeItemStorage,
+  removeWardrobeItem as removeWardrobeItemStorage,
+  wardrobeItemToPaletteColor,
+  loadUseWardrobe,
+  saveUseWardrobe,
+} from "@/lib/wardrobe";
 
 const DEFAULT_RULE: HarmonyRule = "analogous";
 
@@ -60,6 +69,51 @@ export function useOutfit() {
 
   const [lastRerollAt, setLastRerollAt] = useState(0);
 
+  const [wardrobe, setWardrobe] = useState<WardrobeItem[]>([]);
+  const [useWardrobeColors, setUseWardrobeColorsState] = useState(false);
+  const wardrobeRef = useRef<{ pool: Partial<Record<SlotKey, PaletteColor[]>>; enabled: boolean }>({
+    pool: {},
+    enabled: false,
+  });
+
+  useEffect(() => {
+    setWardrobe(loadWardrobe());
+    setUseWardrobeColorsState(loadUseWardrobe());
+  }, []);
+
+  const wardrobePool = useMemo(() => {
+    const pool: Partial<Record<SlotKey, PaletteColor[]>> = {};
+    const flat: PaletteColor[] = [];
+    wardrobe.forEach((item) => {
+      const color = wardrobeItemToPaletteColor(item);
+      if (!pool[item.slot]) pool[item.slot] = [];
+      pool[item.slot]!.push(color);
+      flat.push(color);
+    });
+    registerCustomColors(flat);
+    return pool;
+  }, [wardrobe]);
+
+  useEffect(() => {
+    wardrobeRef.current = { pool: wardrobePool, enabled: useWardrobeColors };
+  }, [wardrobePool, useWardrobeColors]);
+
+  const addWardrobeItem = useCallback((item: Omit<WardrobeItem, "id" | "savedAt">) => {
+    setWardrobe((prev) => addWardrobeItemStorage(prev, item));
+  }, []);
+
+  const removeWardrobeItem = useCallback((id: string) => {
+    setWardrobe((prev) => removeWardrobeItemStorage(prev, id));
+  }, []);
+
+  const setUseWardrobeColors = useCallback((next: boolean) => {
+    setUseWardrobeColorsState(next);
+    saveUseWardrobe(next);
+    // update synchronously so an immediate reroll() right after this call
+    // (e.g. flipping the toggle) already sees the new value
+    wardrobeRef.current = { ...wardrobeRef.current, enabled: next };
+  }, []);
+
   const colors: Record<SlotKey, PaletteColor> = useMemo(() => {
     const out = {} as Record<SlotKey, PaletteColor>;
     SLOT_ORDER.forEach((s) => (out[s] = findColor(state.colorIds[s])));
@@ -94,6 +148,8 @@ export function useOutfit() {
         season: prev.season,
         formalityRange,
         lockedColors,
+        wardrobe: wardrobeRef.current.pool,
+        useWardrobe: wardrobeRef.current.enabled,
       });
 
       const colorIds = {} as Record<SlotKey, string>;
@@ -173,5 +229,10 @@ export function useOutfit() {
     setSeason,
     loadOutfit,
     shareUrl,
+    wardrobe,
+    useWardrobeColors,
+    setUseWardrobeColors,
+    addWardrobeItem,
+    removeWardrobeItem,
   };
 }

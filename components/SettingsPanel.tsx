@@ -6,6 +6,9 @@ import { STYLES, StyleId } from "@/lib/styles";
 import { OCCASIONS, OccasionId } from "@/lib/occasions";
 import { Undertone, Season } from "@/lib/palette";
 import { OutfitState } from "@/lib/outfitState";
+import { SlotKey } from "@/lib/harmonyEngine";
+import { WardrobeItem } from "@/lib/wardrobe";
+import WardrobePanel from "./WardrobePanel";
 
 interface Props {
   state: OutfitState;
@@ -17,6 +20,11 @@ interface Props {
   onOccasion: (o: OccasionId) => void;
   soundOn: boolean;
   onSoundToggle: () => void;
+  wardrobe: WardrobeItem[];
+  useWardrobeColors: boolean;
+  onAddWardrobeItem: (item: { slot: SlotKey; hex: string; garmentType?: string }) => void;
+  onRemoveWardrobeItem: (id: string) => void;
+  onToggleUseWardrobe: () => void;
 }
 
 const UNDERTONES: Undertone[] = ["warm", "cool", "neutral"];
@@ -32,6 +40,11 @@ export default function SettingsPanel({
   onOccasion,
   soundOn,
   onSoundToggle,
+  wardrobe,
+  useWardrobeColors,
+  onAddWardrobeItem,
+  onRemoveWardrobeItem,
+  onToggleUseWardrobe,
 }: Props) {
   const { t } = useI18n();
 
@@ -126,6 +139,14 @@ export default function SettingsPanel({
           ))}
         </div>
       </section>
+
+      <WardrobePanel
+        items={wardrobe}
+        useWardrobe={useWardrobeColors}
+        onAdd={onAddWardrobeItem}
+        onRemove={onRemoveWardrobeItem}
+        onToggleUse={onToggleUseWardrobe}
+      />
 
       <section className="flex items-center justify-between pt-2 border-t border-ink/10 dark:border-cream/10">
         <span className="font-body text-sm text-ink-soft dark:text-cream/70">{t("settings.sound")}</span>

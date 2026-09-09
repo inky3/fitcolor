@@ -12,6 +12,7 @@ export interface PaletteColor {
   undertone: Undertone;
   seasons: Season[];
   formality: number; // 0 (very casual) - 3 (very formal)
+  garmentType?: { en: string; th: string }; // set for user-added wardrobe colors
 }
 
 // Curated, garment-realistic colors spanning the wheel, each hand-named
@@ -77,7 +78,18 @@ export const PALETTE: PaletteColor[] = [
   { id: "chestnut", hex: "#6E3B2A", hue: 15, sat: 44, light: 30, name: { en: "Chestnut", th: "เกาลัด" }, isNeutral: false, undertone: "warm", seasons: ["autumn"], formality: 2 },
 ];
 
+// User-added wardrobe colors are registered here at runtime so findColor()
+// can resolve their ids the same way it resolves curated PALETTE ids.
+const customRegistry: Record<string, PaletteColor> = {};
+
+export function registerCustomColors(colors: PaletteColor[]) {
+  colors.forEach((c) => {
+    customRegistry[c.id] = c;
+  });
+}
+
 export function findColor(id: string): PaletteColor {
+  if (customRegistry[id]) return customRegistry[id];
   const found = PALETTE.find((c) => c.id === id);
   if (!found) return PALETTE[0];
   return found;

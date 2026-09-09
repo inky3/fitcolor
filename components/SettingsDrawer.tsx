@@ -10,7 +10,7 @@ export default function SettingsDrawer({ children }: { children: React.ReactNode
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:block w-72 shrink-0">
+      <aside className="hidden lg:block w-64 xl:w-72 shrink-0">
         <div className="sticky top-8 rounded-2xl border border-ink/10 dark:border-cream/10 bg-paper-card dark:bg-charcoal-card p-5">
           <h2 className="font-display text-lg text-ink dark:text-cream mb-4">{t("settings.title")}</h2>
           {children}

@@ -75,7 +75,7 @@ export default function OutfitSlot({
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden border border-ink/10 dark:border-cream/10 bg-paper-card dark:bg-charcoal-card shadow-sm w-full">
       <div
-        className="relative flex flex-col p-4 sm:p-5 min-h-[230px] sm:min-h-[270px] transition-colors duration-100"
+        className="relative flex flex-col p-4 sm:p-5 aspect-[4/5] transition-colors duration-100"
         style={{ backgroundColor: displayHex }}
       >
         <div className="flex items-start justify-between">
@@ -117,6 +117,11 @@ export default function OutfitSlot({
             </span>
           )}
           <div className="space-y-0.5">
+            {color.garmentType && (
+              <p className="font-body text-[11px] uppercase tracking-wide opacity-70">
+                {color.garmentType[lang] ?? color.garmentType.en}
+              </p>
+            )}
             <p className="font-display text-base sm:text-lg leading-tight">
               {color.name[lang] ?? color.name.en}
             </p>
@@ -132,6 +137,7 @@ export default function OutfitSlot({
               key={f}
               type="button"
               onClick={() => onSetFit(f)}
+              title={t(`fit.${f}Hint`)}
               className={`text-xs font-body px-3 py-1 rounded-full transition-colors ${
                 fit === f
                   ? "bg-moss text-cream dark:bg-sage dark:text-charcoal"

@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <I18nProvider>
           <ThemeProvider>
             <Header />
-            <main className="max-w-6xl mx-auto w-full px-4 sm:px-8 pb-24">{children}</main>
+            <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 pb-24">{children}</main>
           </ThemeProvider>
         </I18nProvider>
       </body>
